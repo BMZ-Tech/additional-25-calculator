@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Recebimento</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Ícones (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .error-msg { font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; display: none; }
+        .input-error { border-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Cabeçalho -->
+    <header class="w-full bg-white shadow-sm py-6">
+        <div class="max-w-5xl mx-auto px-6">
+            <h1 class="text-2xl font-bold text-gray-900">Calculadora de Recebimento</h1>
+            <p class="text-gray-500 text-sm mt-1">Estimativa baseada no tempo de atraso e duração do processo.</p>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-5xl mx-auto w-full px-6 py-10">
+        
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8">
+            
+            <!-- Inputs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Input Salário -->
+                <div class="flex flex-col">
+                    <label for="salario" class="text-sm font-semibold text-gray-700 mb-2">Salário Base (R$)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">R$</span>
+                        <input type="number" id="salario" placeholder="Ex: 2500.00" step="0.01"
+                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Input Início do Atraso -->
+                <div class="flex flex-col">
+                    <label for="dataAtraso" class="text-sm font-semibold text-gray-700 mb-2">Início do Atraso</label>
+                    <input type="date" id="dataAtraso"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-600">
+                    <span id="error-atraso" class="error-msg">Data inválida</span>
+                </div>
+
+                <!-- Input Início do Processo -->
+                <div class="flex flex-col">
+                    <label for="dataProcesso" class="text-sm font-semibold text-gray-700 mb-2">Início do Processo</label>
+                    <input type="date" id="dataProcesso"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-600">
+                    <span id="error-processo" class="error-msg">Data inválida</span>
+                </div>
+
+            </div>
+
+            <!-- Botões -->
+            <div class="flex flex-wrap gap-4 mb-10">
+                <button onclick="calcular()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors shadow-md flex items-center gap-2">
+                    <i data-lucide="calculator" class="w-5 h-5"></i>
+                    Calcular
+                </button>
+                
+                <button onclick="limpar()" 
+                    class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 px-8 rounded-lg transition-colors flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    Limpar
+                </button>
+            </div>
+
+            <!-- Resultados -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Card Informativo 1 -->
+                <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+                    <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">25% do Salário</span>
+                    <div class="mt-2 text-2xl font-bold text-gray-900" id="res-salario-base">R$ 0,00</div>
+                </div>
+
+                <!-- Card Informativo 2 (Meses Totais Considerados) -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Total de Meses Acumulados</span>
+                    <div class="mt-2 text-2xl font-bold text-gray-900" id="res-meses-total">0</div>
+                    <div class="text-xs text-gray-400 mt-1" id="res-detalhe-meses">Atraso: 0 | Processo: 0</div>
+                </div>
+
+                <!-- Card Resultado Final -->
+                <div class="bg-gray-900 rounded-lg p-6 border border-gray-800 text-white shadow-md">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor Líquido Estimado</span>
+                    <div class="mt-2 text-3xl font-bold text-white" id="res-total">R$ 0,00</div>
+                    <!-- <div class="text-xs text-gray-500 mt-2">
+                        *Considerando desc. 50% e + 2 salários min.
+                    </div> -->
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto py-8">
+        <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400">
+                    <i data-lucide="building-2" class="w-6 h-6"></i>
+                </div>
+                <div class="text-sm">
+                    <p class="font-bold text-gray-900">Nome do Escritório</p>
+                    <p class="text-gray-500">Advocacia e Consultoria</p>
+                </div>
+            </div>
+            <div class="text-xs text-gray-400 text-center md:text-right">
+                &copy; <span id="anoAtual"></span> Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.getElementById('anoAtual').innerText = new Date().getFullYear();
+
+        // --- CONSTANTES ---
+        // Salário Mínimo de 2025 (projetado) ou 2024. Ajuste conforme necessidade.
+        const CONST_SALARIO_MINIMO = 1518.00; 
+        const CONST_PORCENTAGEM_EMPRESA = 0.50; // 50%
+        const CONST_PORCENTAGEM_CALCULO = 0.25; // 25%
+
+        const formatarMoeda = (valor) => {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        };
+
+        const mostrarErro = (inputId, msgId, mensagem) => {
+            const input = document.getElementById(inputId);
+            const span = document.getElementById(msgId);
+            input.classList.add('input-error');
+            span.innerText = mensagem;
+            span.style.display = 'block';
+        };
+
+        const limparErros = () => {
+            const inputs = ['dataAtraso', 'dataProcesso'];
+            const spans = ['error-atraso', 'error-processo'];
+            
+            inputs.forEach(id => document.getElementById(id).classList.remove('input-error'));
+            spans.forEach(id => document.getElementById(id).style.display = 'none');
+        };
+
+        const calcularMesesCompletosAteHoje = (dataAntiga) => {
+            const hoje = new Date();
+            
+            const d1 = new Date(dataAntiga.getFullYear(), dataAntiga.getMonth(), dataAntiga.getDate());
+            const d2 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+            let meses = (d2.getFullYear() - d1.getFullYear()) * 12;
+            meses -= d1.getMonth();
+            meses += d2.getMonth();
+
+            if (d2.getDate() < d1.getDate()) {
+                meses--;
+            }
+
+            return meses < 0 ? 0 : meses;
+        };
+
+        function calcular() {
+            limparErros();
+
+            const salarioInput = document.getElementById('salario').value;
+            const dataAtrasoInput = document.getElementById('dataAtraso').value;
+            const dataProcessoInput = document.getElementById('dataProcesso').value;
+
+            if (!salarioInput || !dataAtrasoInput || !dataProcessoInput) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            const salarioBase = parseFloat(salarioInput);
+            const dataAtraso = new Date(dataAtrasoInput + 'T00:00:00'); 
+            const dataProcesso = new Date(dataProcessoInput + 'T00:00:00');
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            let temErro = false;
+
+            const mesesDesdeAtraso = calcularMesesCompletosAteHoje(dataAtraso);
+            
+            if (dataAtraso > hoje) {
+                mostrarErro('dataAtraso', 'error-atraso', 'A data não pode ser futura.');
+                temErro = true;
+            } else {
+                const dataLimiteAtraso = new Date();
+                dataLimiteAtraso.setMonth(dataLimiteAtraso.getMonth() - 66);
+                
+                if (dataAtraso < dataLimiteAtraso) {
+                    mostrarErro('dataAtraso', 'error-atraso', 'A data não pode ser superior a 65 meses atrás.');
+                    temErro = true;
+                }
+            }
+
+            if (dataProcesso > hoje) {
+                mostrarErro('dataProcesso', 'error-processo', 'A data não pode ser futura.');
+                temErro = true;
+            } else {
+                const mesesDeProcesso = calcularMesesCompletosAteHoje(dataProcesso);
+                if (mesesDeProcesso < 18) {
+                    mostrarErro('dataProcesso', 'error-processo', 'O processo deve ter no mínimo 18 meses de duração.');
+                    temErro = true;
+                }
+            }
+
+            if (temErro) return;
+
+            const qtdMesesAtraso = calcularMesesCompletosAteHoje(dataAtraso);
+            const qtdMesesProcesso = calcularMesesCompletosAteHoje(dataProcesso);
+            const totalMeses = qtdMesesAtraso + qtdMesesProcesso;
+            const salario25 = salarioBase * CONST_PORCENTAGEM_CALCULO;
+
+            // FÓRMULA:
+            // ((Meses do Atraso + Meses do Processo) * 25% do Salário Base)) - (50% do total do Salário Base) + 2 Salários Mínimos Atuais
+            const totalAtraso = totalMeses * salario25;
+            const totalDesconto = totalAtraso * CONST_PORCENTAGEM_EMPRESA + (2*CONST_SALARIO_MINIMO);
+            const totalLiquido = totalAtraso - totalDesconto;
+
+            // const parte1 = totalMeses * (salarioBase * CONST_PORCENTAGEM_CALCULO);
+            // const parte2 = salarioBase * CONST_PORCENTAGEM_EMPRESA;
+            // const parte3 = 2 * CONST_SALARIO_MINIMO;
+
+            // const resultadoFinal = parte1 - parte2 - parte3;
+
+            document.getElementById('res-salario-base').innerText = formatarMoeda(salario25);
+            document.getElementById('res-meses-total').innerText = totalMeses;
+            document.getElementById('res-detalhe-meses').innerText = `Atraso: ${qtdMesesAtraso} | Processo: ${qtdMesesProcesso}`;
+            document.getElementById('res-total').innerText = formatarMoeda(totalLiquido);
+        }
+
+        function limpar() {
+            limparErros();
+            document.getElementById('salario').value = '';
+            document.getElementById('dataAtraso').value = '';
+            document.getElementById('dataProcesso').value = '';
+            
+            document.getElementById('res-salario-base').innerText = 'R$ 0,00';
+            document.getElementById('res-meses-total').innerText = '0';
+            document.getElementById('res-detalhe-meses').innerText = 'Atraso: 0 | Processo: 0';
+            document.getElementById('res-total').innerText = 'R$ 0,00';
+        }
+    </script>
+</body>
+</html>
