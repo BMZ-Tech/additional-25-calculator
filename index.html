@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Recebimento</title>
+    <title>Calculadora de Recebimento - 25% Adicional</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonte Inter -->
@@ -22,7 +22,7 @@
     <!-- Cabeçalho -->
     <header class="w-full bg-white shadow-sm py-6">
         <div class="max-w-5xl mx-auto px-6">
-            <h1 class="text-2xl font-bold text-gray-900">Calculadora de Recebimento</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Calculadora de Recebimento - 25% Adicional</h1>
             <p class="text-gray-500 text-sm mt-1">Estimativa baseada no tempo de atraso e duração do processo.</p>
         </div>
     </header>
@@ -53,12 +53,13 @@
                     <span id="error-atraso" class="error-msg">Data inválida</span>
                 </div>
 
-                <!-- Input Início do Processo -->
+                <!-- Input Duração do Processo -->
                 <div class="flex flex-col">
-                    <label for="dataProcesso" class="text-sm font-semibold text-gray-700 mb-2">Início do Processo</label>
-                    <input type="date" id="dataProcesso"
+                    <label for="mesesProcesso" class="text-sm font-semibold text-gray-700 mb-2">Duração do Processo (meses)</label>
+                    <input type="number" id="mesesProcesso" min="1" placeholder="Ex: 18"
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-600">
-                    <span id="error-processo" class="error-msg">Data inválida</span>
+                    <span class="text-xs text-gray-500 mt-1">Tempo médio de duração: 18 meses.</span>
+                    <span id="error-processo" class="error-msg">Informe um número válido de meses.</span>
                 </div>
 
             </div>
@@ -109,15 +110,18 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-auto py-8">
-        <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center md:justify-between gap-6 w-full">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400">
+                <!-- <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400">
                     <i data-lucide="building-2" class="w-6 h-6"></i>
-                </div>
+                </div> -->
                 <div class="text-sm">
-                    <p class="font-bold text-gray-900">Nome do Escritório</p>
-                    <p class="text-gray-500">Advocacia e Consultoria</p>
+                    <p class="font-bold text-gray-900">BMZ - Belin, Medeiros e Zaiats</p>
+                    <p class="text-gray-500">Advogados e Associados</p>
                 </div>
+            </div>
+            <div class="flex-1 flex justify-center">
+                <img src="Logo-BMZ.png" alt="Logo BMZ" class="h-20 object-contain">
             </div>
             <div class="text-xs text-gray-400 text-center md:text-right">
                 &copy; <span id="anoAtual"></span> Todos os direitos reservados.
@@ -148,7 +152,7 @@
         };
 
         const limparErros = () => {
-            const inputs = ['dataAtraso', 'dataProcesso'];
+            const inputs = ['dataAtraso', 'mesesProcesso'];
             const spans = ['error-atraso', 'error-processo'];
             
             inputs.forEach(id => document.getElementById(id).classList.remove('input-error'));
@@ -177,22 +181,20 @@
 
             const salarioInput = document.getElementById('salario').value;
             const dataAtrasoInput = document.getElementById('dataAtraso').value;
-            const dataProcessoInput = document.getElementById('dataProcesso').value;
+            const mesesProcessoInput = document.getElementById('mesesProcesso').value;
 
-            if (!salarioInput || !dataAtrasoInput || !dataProcessoInput) {
+            if (!salarioInput || !dataAtrasoInput || !mesesProcessoInput) {
                 alert("Por favor, preencha todos os campos.");
                 return;
             }
 
             const salarioBase = parseFloat(salarioInput);
             const dataAtraso = new Date(dataAtrasoInput + 'T00:00:00'); 
-            const dataProcesso = new Date(dataProcessoInput + 'T00:00:00');
+            const mesesProcesso = parseInt(mesesProcessoInput, 10);
             const hoje = new Date();
             hoje.setHours(0,0,0,0);
 
             let temErro = false;
-
-            const mesesDesdeAtraso = calcularMesesCompletosAteHoje(dataAtraso);
             
             if (dataAtraso > hoje) {
                 mostrarErro('dataAtraso', 'error-atraso', 'A data não pode ser futura.');
@@ -207,21 +209,14 @@
                 }
             }
 
-            if (dataProcesso > hoje) {
-                mostrarErro('dataProcesso', 'error-processo', 'A data não pode ser futura.');
+            if (Number.isNaN(mesesProcesso) || mesesProcesso <= 0) {
+                mostrarErro('mesesProcesso', 'error-processo', 'Informe um número válido de meses.');
                 temErro = true;
-            } else {
-                const mesesDeProcesso = calcularMesesCompletosAteHoje(dataProcesso);
-                if (mesesDeProcesso < 18) {
-                    mostrarErro('dataProcesso', 'error-processo', 'O processo deve ter no mínimo 18 meses de duração.');
-                    temErro = true;
-                }
-            }
-
+            } 
             if (temErro) return;
 
             const qtdMesesAtraso = calcularMesesCompletosAteHoje(dataAtraso);
-            const qtdMesesProcesso = calcularMesesCompletosAteHoje(dataProcesso);
+            const qtdMesesProcesso = mesesProcesso;
             const totalMeses = qtdMesesAtraso + qtdMesesProcesso;
             const salario25 = salarioBase * CONST_PORCENTAGEM_CALCULO;
 
@@ -247,7 +242,7 @@
             limparErros();
             document.getElementById('salario').value = '';
             document.getElementById('dataAtraso').value = '';
-            document.getElementById('dataProcesso').value = '';
+            document.getElementById('mesesProcesso').value = '';
             
             document.getElementById('res-salario-base').innerText = 'R$ 0,00';
             document.getElementById('res-meses-total').innerText = '0';
