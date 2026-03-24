@@ -50,6 +50,7 @@
                     <label for="dataAtraso" class="text-sm font-semibold text-gray-700 mb-2">Início do Atraso</label>
                     <input type="date" id="dataAtraso"
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-600">
+                    <span class="text-xs text-gray-500 mt-1">No cálculo serão considerados no máximo os últimos 65 meses (60 meses + 5 de 13º).</span>
                     <span id="error-atraso" class="error-msg">Data inválida</span>
                 </div>
 
@@ -135,9 +136,12 @@
 
         // --- CONSTANTES ---
         // Salário Mínimo de 2025 (projetado) ou 2024. Ajuste conforme necessidade.
-        const CONST_SALARIO_MINIMO = 1518.00; 
+        const CONST_SALARIO_MINIMO = 1621.00; 
         const CONST_PORCENTAGEM_EMPRESA = 0.50; // 50%
         const CONST_PORCENTAGEM_CALCULO = 0.25; // 25%
+        const CONST_MESES_LIMITE_ATRASO = 65; // 60 meses + 5 de 13º
+        const CONST_QTD_13_SALARIO = 13;
+        const CONST_PORCENTAGEM_SALARIO_MINIMO = 0.25;
 
         const formatarMoeda = (valor) => {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
@@ -199,14 +203,6 @@
             if (dataAtraso > hoje) {
                 mostrarErro('dataAtraso', 'error-atraso', 'A data não pode ser futura.');
                 temErro = true;
-            } else {
-                const dataLimiteAtraso = new Date();
-                dataLimiteAtraso.setMonth(dataLimiteAtraso.getMonth() - 66);
-                
-                if (dataAtraso < dataLimiteAtraso) {
-                    mostrarErro('dataAtraso', 'error-atraso', 'A data não pode ser superior a 65 meses atrás.');
-                    temErro = true;
-                }
             }
 
             if (Number.isNaN(mesesProcesso) || mesesProcesso <= 0) {
@@ -215,7 +211,8 @@
             } 
             if (temErro) return;
 
-            const qtdMesesAtraso = calcularMesesCompletosAteHoje(dataAtraso);
+            const qtdMesesAtrasoReal = calcularMesesCompletosAteHoje(dataAtraso);
+            const qtdMesesAtraso = Math.min(qtdMesesAtrasoReal, CONST_MESES_LIMITE_ATRASO);
             const qtdMesesProcesso = mesesProcesso;
             const totalMeses = qtdMesesAtraso + qtdMesesProcesso;
             const salario25 = salarioBase * CONST_PORCENTAGEM_CALCULO;
@@ -223,7 +220,7 @@
             // FÓRMULA:
             // ((Meses do Atraso + Meses do Processo) * 25% do Salário Base)) - (50% do total do Salário Base) + 2 Salários Mínimos Atuais
             const totalAtraso = totalMeses * salario25;
-            const totalDesconto = totalAtraso * CONST_PORCENTAGEM_EMPRESA + (2*CONST_SALARIO_MINIMO);
+            const totalDesconto = totalAtraso * CONST_PORCENTAGEM_EMPRESA + (CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO);
             const totalLiquido = totalAtraso - totalDesconto;
 
             // const parte1 = totalMeses * (salarioBase * CONST_PORCENTAGEM_CALCULO);
@@ -234,7 +231,10 @@
 
             document.getElementById('res-salario-base').innerText = formatarMoeda(salario25);
             document.getElementById('res-meses-total').innerText = totalMeses;
-            document.getElementById('res-detalhe-meses').innerText = `Atraso: ${qtdMesesAtraso} | Processo: ${qtdMesesProcesso}`;
+            const detalheAtraso = qtdMesesAtrasoReal > CONST_MESES_LIMITE_ATRASO
+                ? `Atraso: ${qtdMesesAtraso} (limitado de ${qtdMesesAtrasoReal})`
+                : `Atraso: ${qtdMesesAtraso}`;
+            document.getElementById('res-detalhe-meses').innerText = `${detalheAtraso} | Processo: ${qtdMesesProcesso}`;
             document.getElementById('res-total').innerText = formatarMoeda(totalLiquido);
         }
 
