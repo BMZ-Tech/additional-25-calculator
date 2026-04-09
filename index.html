@@ -135,7 +135,7 @@
         document.getElementById('anoAtual').innerText = new Date().getFullYear();
 
         // --- CONSTANTES ---
-        // Salário Mínimo de 2025 (projetado) ou 2024. Ajuste conforme necessidade.
+        // Salário Mínimo de 2026. Ajuste conforme necessidade.
         const CONST_SALARIO_MINIMO = 1621.00; 
         const CONST_PORCENTAGEM_EMPRESA = 0.50; // 50%
         const CONST_PORCENTAGEM_CALCULO = 0.25; // 25%
@@ -218,16 +218,11 @@
             const salario25 = salarioBase * CONST_PORCENTAGEM_CALCULO;
 
             // FÓRMULA:
-            // ((Meses do Atraso + Meses do Processo) * 25% do Salário Base)) - (50% do total do Salário Base) + 2 Salários Mínimos Atuais
-            const totalAtraso = totalMeses * salario25;
-            const totalDesconto = totalAtraso * CONST_PORCENTAGEM_EMPRESA + (CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO);
+            // [((Meses do Atraso + Meses do Processo) * 25% do Salário Base) + (13 * 25% do Salário Base)] - (50% do total do Salário Base + Anuidade)
+            const totalAtraso = (totalMeses * salario25);
+            const totalDesconto = (totalAtraso * CONST_PORCENTAGEM_EMPRESA) + ((CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO) / 2);
             const totalLiquido = totalAtraso - totalDesconto;
 
-            // const parte1 = totalMeses * (salarioBase * CONST_PORCENTAGEM_CALCULO);
-            // const parte2 = salarioBase * CONST_PORCENTAGEM_EMPRESA;
-            // const parte3 = 2 * CONST_SALARIO_MINIMO;
-
-            // const resultadoFinal = parte1 - parte2 - parte3;
 
             document.getElementById('res-salario-base').innerText = formatarMoeda(salario25);
             document.getElementById('res-meses-total').innerText = totalMeses;
