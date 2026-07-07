@@ -137,7 +137,7 @@
         // --- CONSTANTES ---
         // Salário Mínimo de 2026. Ajuste conforme necessidade.
         const CONST_SALARIO_MINIMO = 1621.00; 
-        const CONST_PORCENTAGEM_EMPRESA = 0.40; // 50%
+        const CONST_PORCENTAGEM_EMPRESA = 0.40; // 40%
         const CONST_PORCENTAGEM_CALCULO = 0.25; // 25%
         const CONST_MESES_LIMITE_ATRASO = 65; // 60 meses + 5 de 13º
         const CONST_QTD_13_SALARIO = 13;
@@ -220,7 +220,7 @@
             // FÓRMULA:
             // [((Meses do Atraso + Meses do Processo) * 25% do Salário Base) + (13 * 25% do Salário Base)] - (50% do total do Salário Base + Anuidade)
             const totalAtraso = (totalMeses * salario25);
-            const totalDesconto = (totalAtraso * CONST_PORCENTAGEM_EMPRESA) + ((CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO) / 2);
+            const totalDesconto = (totalAtraso * CONST_PORCENTAGEM_EMPRESA) + ((CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO * CONST_PORCENTAGEM_EMPRESA));
             const totalLiquido = totalAtraso - totalDesconto;
 
 
