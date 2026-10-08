@@ -101,7 +101,7 @@
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor Líquido Estimado</span>
                     <div class="mt-2 text-3xl font-bold text-white" id="res-total">R$ 0,00</div>
                     <!-- <div class="text-xs text-gray-500 mt-2">
-                        *Considerando desc. 50% e + 2 salários min.
+                        *Considerando desc. de 30% de honorários.
                     </div> -->
                 </div>
 
@@ -137,7 +137,7 @@
         // --- CONSTANTES ---
         // Salário Mínimo de 2026. Ajuste conforme necessidade.
         const CONST_SALARIO_MINIMO = 1621.00; 
-        const CONST_PORCENTAGEM_EMPRESA = 0.40; // 40%
+        const CONST_PORCENTAGEM_EMPRESA = 0.30; // 30%
         const CONST_PORCENTAGEM_CALCULO = 0.25; // 25%
         const CONST_MESES_LIMITE_ATRASO = 65; // 60 meses + 5 de 13º
         const CONST_QTD_13_SALARIO = 13;
@@ -218,7 +218,7 @@
             const salario25 = salarioBase * CONST_PORCENTAGEM_CALCULO;
 
             // FÓRMULA:
-            // [((Meses do Atraso + Meses do Processo) * 25% do Salário Base) + (13 * 25% do Salário Base)] - (50% do total do Salário Base + Anuidade)
+            // [((Meses do Atraso + Meses do Processo) * 25% do Salário Base) + (13 * 25% do Salário Base)] - (30% do total do Salário Base + 30% da Anuidade)
             const totalAtraso = (totalMeses * salario25);
             const totalDesconto = (totalAtraso * CONST_PORCENTAGEM_EMPRESA) + ((CONST_QTD_13_SALARIO * CONST_PORCENTAGEM_SALARIO_MINIMO * CONST_SALARIO_MINIMO * CONST_PORCENTAGEM_EMPRESA));
             const totalLiquido = totalAtraso - totalDesconto;
